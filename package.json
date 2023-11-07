@@ -1,0 +1,30 @@
+{
+  "name": "air-esbuild",
+  "version": "1.0.0",
+  "description": "A simple esbuild boilerplate for compiling JS and SCSS files",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidhirtz/air-esbuild.git"
+  },
+  "author": "David Hirtz",
+  "bugs": {
+    "url": "https://github.com/davidhirtz/air-esbuild/issues"
+  },
+  "dependencies": {
+    "@hail2u/css-mqpacker": "github:hail2u/node-css-mqpacker#v9.0.1",
+    "autoprefixer": "^10.4.16",
+    "esbuild": "^0.19.5",
+    "esbuild-sass-plugin": "^2.16.0",
+    "postcss": "^8.4.31"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "postcss-modules": "^6.0.0",
+    "typescript": "^5.2.2"
+  }
+}

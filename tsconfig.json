@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+//    "declarationDir": "./types",
+//    "declarationMap": true,
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "esnext",
+  },
+  "include": [
+    "src/index.ts"
+  ]
+}
