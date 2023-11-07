@@ -1,29 +1,27 @@
-import * as esbuild from 'esbuild';
-import * as autoprefixer from "autoprefixer";
-import * as fs from "fs";
+import esbuild from 'esbuild';
+import autoprefixer from "autoprefixer";
+import fs from "fs";
 import mQPacker from '@hail2u/css-mqpacker';
-import * as postcss from "postcss";
+import postcss from "postcss";
 import { sassPlugin } from 'esbuild-sass-plugin';
 export default class Builder {
     watch = process.argv.slice(2).includes('--watch');
     cssContext;
     jsContext;
-    cssStartTime;
-    jsStartTime;
     cssOptions = {
-        entryPoints: ['resources/scss/site.scss'],
+        entryPoints: ['./resources/scss/site.scss'],
         minify: true,
-        outdir: 'web/css',
+        outdir: './web/css/',
         plugins: [],
         sourcemap: true,
     };
     jsOptions = {
         bundle: true,
-        entryPoints: [`resources/js/site.ts`],
-        external: ['resources/js/vendor/*'],
+        entryPoints: ['./resources/js/site.ts'],
+        external: ['./resources/js/vendor/*'],
         format: 'esm',
         minify: true,
-        outdir: 'web/js',
+        outdir: './web/js/',
         plugins: [],
         sourcemap: true,
         splitting: true,
@@ -31,11 +29,30 @@ export default class Builder {
     jsVendorDir = 'vendor';
     constructor(config) {
         Object.assign(this, { ...config });
-        this.configure();
+        this.configureCss();
+        this.configureJs();
         void this.build();
     }
-    configure() {
-        this.cssOptions.plugins.push(this.cssWatchPlugin);
+    configureCss() {
+        let cssStartTime;
+        this.cssOptions.plugins.push({
+            name: 'css-watch-plugin',
+            setup(build) {
+                build.onStart(() => {
+                    cssStartTime = Date.now();
+                });
+                build.onEnd((result) => {
+                    if (result.errors.length) {
+                        console.log(result.errors);
+                    }
+                    console.log(`Compiled styles with esbuild (${esbuild.version}) in ${Date.now() - cssStartTime}ms`);
+                });
+            }
+        });
+    }
+    configureJs() {
+        const builder = this;
+        let jsStartTime;
         this.cssOptions.plugins.push(sassPlugin({
             async transform(source) {
                 const { css } = await postcss([
@@ -45,7 +62,26 @@ export default class Builder {
                 return css;
             }
         }));
-        this.jsOptions.plugins.push(this.jsWatchPlugin);
+        this.jsOptions.plugins.push({
+            name: 'js-watch-plugin',
+            setup(build) {
+                build.onStart(() => {
+                    const dir = builder.jsOptions.outdir;
+                    if (fs.existsSync(dir) || fs.mkdirSync(dir)) {
+                        jsStartTime = Date.now();
+                        fs.readdirSync(dir)
+                            .filter((file) => file !== builder.jsVendorDir)
+                            .map((file) => fs.unlinkSync(dir + file));
+                    }
+                });
+                build.onEnd((result) => {
+                    if (result.errors.length) {
+                        console.log(result.errors);
+                    }
+                    console.log(`Bundled scripts with esbuild (${esbuild.version}) in ${Date.now() - jsStartTime}ms`);
+                });
+            }
+        });
     }
     async build() {
         this.cssContext = await esbuild.context(this.cssOptions);
@@ -61,38 +97,4 @@ export default class Builder {
             await this.jsContext.dispose();
         }
     }
-    cssWatchPlugin = {
-        name: 'css-watch-plugin',
-        setup(build) {
-            build.onStart(() => {
-                this.cssStartTime = Date.now();
-            });
-            build.onEnd((result) => {
-                if (result.errors.length) {
-                    console.log(result.errors);
-                }
-                console.log(`Compiled styles with esbuild (${esbuild.version}) in ${Date.now() - this.cssStartTime}ms`);
-            });
-        }
-    };
-    jsWatchPlugin = {
-        name: 'js-watch-plugin',
-        setup(build) {
-            build.onStart(() => {
-                const dir = this.jsOptions.outdir;
-                if (fs.existsSync(dir) || fs.mkdirSync(dir)) {
-                    this.jsStartTime = Date.now();
-                    fs.readdirSync(dir)
-                        .filter((file) => file !== this.jsVendorDir)
-                        .map((file) => fs.unlinkSync(dir + file));
-                }
-            });
-            build.onEnd((result) => {
-                if (result.errors.length) {
-                    console.log(result.errors);
-                }
-                console.log(`Bundled scripts with esbuild (${esbuild.version}) in ${Date.now() - this.jsStartTime}ms`);
-            });
-        }
-    };
 }
