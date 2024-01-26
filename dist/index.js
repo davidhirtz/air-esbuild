@@ -1,13 +1,12 @@
 import esbuild from 'esbuild';
-import autoprefixer from "autoprefixer";
-import fs from "fs";
+import autoprefixer from 'autoprefixer';
+import fs from 'fs';
 import mQPacker from '@hail2u/css-mqpacker';
-import postcss from "postcss";
+import postcss from 'postcss';
 import { sassPlugin } from 'esbuild-sass-plugin';
+// noinspection JSUnusedGlobalSymbols
 export default class Builder {
-    watch = process.argv.slice(2).includes('--watch');
     cssContext;
-    jsContext;
     cssOptions = {
         entryPoints: ['./resources/scss/site.scss'],
         minify: true,
@@ -15,6 +14,7 @@ export default class Builder {
         plugins: [],
         sourcemap: true,
     };
+    jsContext;
     jsOptions = {
         bundle: true,
         entryPoints: ['./resources/js/site.ts'],
@@ -26,9 +26,22 @@ export default class Builder {
         sourcemap: true,
         splitting: true,
     };
+    /**
+     * @var string the directory name for vendor scripts, this directory will be excluded from purging on rebuild
+     */
     jsVendorDir = 'vendor';
+    watch = process.argv.slice(2).includes('--watch');
     constructor(config) {
-        Object.assign(this, { ...config });
+        ['cssOptions', 'jsOptions'].forEach((key) => {
+            if (config[key]) {
+                Object.assign(this[key], config[key]);
+            }
+        });
+        ['jsVendorDir', 'watch'].forEach((key) => {
+            if (config[key]) {
+                this[key] = config[key];
+            }
+        });
         this.configureCss();
         this.configureJs();
         void this.build();

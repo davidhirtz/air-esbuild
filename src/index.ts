@@ -1,18 +1,13 @@
 import esbuild from 'esbuild';
-import autoprefixer from "autoprefixer";
-import fs from "fs";
+import autoprefixer from 'autoprefixer';
+import fs from 'fs';
 import mQPacker from '@hail2u/css-mqpacker';
-import postcss from "postcss";
+import postcss from 'postcss';
 import {sassPlugin} from 'esbuild-sass-plugin'
 
-
+// noinspection JSUnusedGlobalSymbols
 export default class Builder {
-
-    watch = process.argv.slice(2).includes('--watch');
-
     cssContext: esbuild.BuildContext;
-    jsContext: esbuild.BuildContext;
-
     cssOptions: esbuild.BuildOptions = {
         entryPoints: ['./resources/scss/site.scss'],
         minify: true,
@@ -21,6 +16,7 @@ export default class Builder {
         sourcemap: true,
     }
 
+    jsContext: esbuild.BuildContext;
     jsOptions: esbuild.BuildOptions = {
         bundle: true,
         entryPoints: ['./resources/js/site.ts'],
@@ -33,10 +29,25 @@ export default class Builder {
         splitting: true,
     }
 
+    /**
+     * @var string the directory name for vendor scripts, this directory will be excluded from purging on rebuild
+     */
     jsVendorDir: string = 'vendor';
 
-    constructor(config?: Object) {
-        Object.assign(this, {...config});
+    watch: boolean = process.argv.slice(2).includes('--watch');
+
+    constructor(config?: Builder) {
+        ['cssOptions', 'jsOptions'].forEach((key) => {
+            if (config[key]) {
+                Object.assign(this[key], config[key]);
+            }
+        });
+
+        ['jsVendorDir', 'watch'].forEach((key) => {
+            if (config[key]) {
+                this[key] = config[key];
+            }
+        });
 
         this.configureCss();
         this.configureJs();
@@ -65,6 +76,7 @@ export default class Builder {
         });
 
     }
+
     configureJs() {
         const builder = this;
         let jsStartTime: number;
@@ -120,4 +132,5 @@ export default class Builder {
             await this.cssContext.dispose();
             await this.jsContext.dispose();
         }
-    }}
+    }
+}
