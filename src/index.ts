@@ -37,17 +37,19 @@ export default class Builder {
     watch: boolean = process.argv.slice(2).includes('--watch');
 
     constructor(config?: Builder) {
-        ['cssOptions', 'jsOptions'].forEach((key) => {
-            if (config[key]) {
-                Object.assign(this[key], config[key]);
-            }
-        });
+        if (config) {
+            ['cssOptions', 'jsOptions'].forEach((key) => {
+                if (config[key]) {
+                    Object.assign(this[key], config[key]);
+                }
+            });
 
-        ['jsVendorDir', 'watch'].forEach((key) => {
-            if (config[key]) {
-                this[key] = config[key];
-            }
-        });
+            ['jsVendorDir', 'watch'].forEach((key) => {
+                if (config[key]) {
+                    this[key] = config[key];
+                }
+            });
+        }
 
         this.configureCss();
         this.configureJs();
