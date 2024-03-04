@@ -1,6 +1,6 @@
 {
   "name": "air-esbuild",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simple esbuild boilerplate for compiling JS and SCSS files",
   "type": "module",
   "main": "dist/index.js",
