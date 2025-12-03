@@ -1,6 +1,6 @@
 {
   "name": "air-esbuild",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple esbuild boilerplate for compiling JS and SCSS files",
   "type": "module",
   "main": "dist/index.js",
@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "@hail2u/css-mqpacker": "github:hail2u/node-css-mqpacker#v9.0.1",
-    "autoprefixer": "^10.4.16",
-    "esbuild": "^0.19.5",
-    "esbuild-sass-plugin": "^2.16.0",
-    "postcss": "^8.4.31"
+    "autoprefixer": "^10.4",
+    "esbuild": "^0.25",
+    "esbuild-sass-plugin": "^3.3",
+    "postcss": "^8.5"
   },
   "devDependencies": {
     "@types/node": "^20.8.10",
